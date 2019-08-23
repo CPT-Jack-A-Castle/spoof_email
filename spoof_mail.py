@@ -36,7 +36,10 @@ def send_mail(mx):
     fromaddr = input("From: ").strip()
     to  = input("To: ").strip().split()
 
-    msg = 'Spoof test by @TheRealZeznzo'
+    body = 'Spoof test'
+    subject = 'Hello World!'
+
+    msg = 'Subject: ' + subject + '\n' + body
 
     server = smtplib.SMTP(mx)
     server.set_debuglevel(1)
