@@ -1,5 +1,7 @@
-#!/usr/bin/python3
-import os, sys, dns.resolver, telnetlib, time
+#!/usr/bin/env python3
+
+import smtplib, readline, dns.resolver, sys
+
 
 def start():
     domain = sys.argv[1]
@@ -13,7 +15,7 @@ def check_mx(domain):
 
     if len(d) == 1:
         print('Using: %s' % d[0])
-        message(d[0], domain)
+        send_mail(d[0])
     else:
         pass
 
@@ -26,67 +28,19 @@ def check_mx(domain):
     try:
         s = d[int(select)]
         print('Using: %s' % s)
-        message(s, domain)
+        send_mail(s)
     except Exception as e:
         print('[ERROR] Invalid option...')
 
-def message(mx, domain):
-    f = input('From (this can be anything): ')
-    #f = 'info@microsoft.com'
+def send_mail(mx):
+    fromaddr = input("From: ").strip()
+    to  = input("To: ").strip().split()
 
-    print('\nMust end with the same domain, ex: info@%s' % domain)
-    to = input('To: ')
-    #to = 'info@steuijt.nl'
+    msg = 'Spoof test by @TheRealZeznzo'
 
-    #title = input('Title: ')
-    title = 'test'
-    #body = 'test'
-    global lines
-    lines = []
-
-    try:
-        print('[Write the body] Finish with CTRL + C')
-        while True:
-            body = input('>>  ')
-            lines.append(body)
-    except KeyboardInterrupt:
-        print('\n')
-        print('[OK] Message')
-        #for l in lines:
-        #    print (l + '\n')
-    send(mx, f, to, title)
-
-def send(mx, f, to, title):
-    bot = telnetlib.Telnet(mx, 25)
-    bot.set_debuglevel(10)
-    time.sleep(2)
-    bot.write('EHLO '.encode('ascii') + mx.encode('ascii') + b'\n')
-    time.sleep(2)
-    bot.write('MAIL FROM: <'.encode('ascii') + f.encode('ascii') +  '>'.encode('ascii') + b'\n')
-    time.sleep(2)
-    bot.write('RCPT TO: <'.encode('ascii') + to.encode('ascii') +  '>'.encode('ascii') +  b'\n')
-    time.sleep(2)
-
-    bot.write('DATA'.encode('ascii') + b'\n')
-    time.sleep(2)
-    bot.write('Subject:'.encode('ascii') + title.encode('ascii') + b'\n')
-    time.sleep(2)
-    bot.write(b'\n')
-    time.sleep(2)
-    #bot.write(body.encode('ascii') + b'\n')
-    for l in lines:
-        bot.write(l.encode('ascii') + b'\n')
-        time.sleep(2)
-    time.sleep(2)
-    bot.write('.'.encode('ascii') + b'\n')
-    time.sleep(2)
-    bot.write('QUIT'.encode('ascii'))
-    time.sleep(2)
-    print(bot.read_all())
-    bot.close()
-    print('\n[DONE] Message sent... Read the log to know if it ran into any errors, if not, the message should be sent successfuly.')
-    print('[NOTE] Some spam-filters block these kind of messages so I cannot guarantee they received it.')
-    sys.exit(0)
-
+    server = smtplib.SMTP(mx)
+    server.set_debuglevel(1)
+    server.sendmail(fromaddr, to, msg)
+    server.quit()
 
 start()
